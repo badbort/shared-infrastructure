@@ -10,6 +10,8 @@ on:
 permissions:
   id-token: write
   contents: read
+  issues: write
+  pull-requests: write
 
 env:
   tf_actions_working_dir: infrastructure
