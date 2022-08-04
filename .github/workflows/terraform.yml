@@ -14,13 +14,16 @@ permissions:
   pull-requests: write
 
 env:
-  tf_actions_working_dir: infrastructure
+  tf_directory: infrastructure
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: tfplan
+    defaults:
+      run:
+        working-directory: ./${{env.tf_directory}}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
