@@ -10,15 +10,26 @@ on:
 permissions:
   id-token: write
   contents: read
+  issues: write
+  pull-requests: write
 
 env:
-  tf_actions_working_dir: infrastructure
+  tf_directory: infrastructure
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: tfplan
+    defaults:
+      run:
+        working-directory: ./${{env.tf_directory}}
+    
+    env:
+      ARM_USE_OIDC: true
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -37,6 +48,10 @@ jobs:
         continue-on-error: false
         run: terraform fmt -check
       
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
