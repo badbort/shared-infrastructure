@@ -11,6 +11,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  tf_actions_working_dir: infrastructure
+
 jobs:
   terraform:
     name: 'Terraform'
