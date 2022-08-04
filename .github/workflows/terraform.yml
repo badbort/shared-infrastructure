@@ -24,6 +24,10 @@ jobs:
     defaults:
       run:
         working-directory: ./${{env.tf_directory}}
+    
+    env:
+      ARM_USE_OIDC: true
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -45,11 +49,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_USE_OIDC: true
         
       - name: Terraform Validate
         id: validate
