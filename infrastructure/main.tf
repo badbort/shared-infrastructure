@@ -5,6 +5,8 @@ provider "azurerm" {
   features {}
 }
 
+provider "azuread" {}
+
 module "common" {
   source = "./modules/common_values"
 }
@@ -29,3 +31,5 @@ resource "azurerm_storage_container" "terraform_state" {
   container_access_type = "private"
   storage_account_name  = azurerm_storage_account.terraform_state_storage.name
 }
+
+data "azuread_client_config" "current" {}
