@@ -1,7 +1,8 @@
 locals {
   github_repos_with_apps = {
-    backstage_testing : {
-      repo        = "tftesting-testing"
+    first_test : {
+      github_org  = "badbort"
+      repo        = "backstage-test"
       environment = "tfplan"
     }
   }
@@ -15,17 +16,16 @@ resource "azuread_application" "github_actions_aadapplication" {
   lifecycle {
     ignore_changes = [
       required_resource_access
-    ]    
+    ]
   }
-  
 }
 
-# resource "azuread_application_federated_identity_credential" "example" {
-#   for_each              = azuread_application.github_actions_aadapplication
-#   application_object_id = each.value.object_id
-#   display_name          = "my-repo-deploy"
-#   description           = "Deployments for my-repo"
-#   audiences             = ["api://AzureADTokenExchange"]
-#   issuer                = "https://token.actions.githubusercontent.com"
-#   subject               = "repo:${each.value.<something?>.repo}/my-repo:environment:prod"
-# }
+resource "azuread_application_federated_identity_credential" "cred" {
+  for_each              = local.github_repos_with_apps
+  application_object_id = resource.azuread_application.github_actions_aadapplication[each.key].object_id
+  display_name          = each.value.repo
+  description           = "Terraform deployments for ${each.value.github_org}/${each.value.repo}"
+  audiences             = ["api://AzureADTokenExchange"]
+  issuer                = "https://token.actions.githubusercontent.com"
+  subject               = "repo:${each.value.github_org}/${each.value.repo}:environment:${each.value.environment}"
+}
