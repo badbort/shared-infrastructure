@@ -20,7 +20,7 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    environment: tf
+    environment: tfplan
     defaults:
       run:
         working-directory: ./${{env.tf_directory}}
