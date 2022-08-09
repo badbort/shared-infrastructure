@@ -6,7 +6,7 @@ locals {
 
 output "tf_sta_name" {
   description = "Name of the shared Azure storage account for storing tfstate containers and files"
-  value = local.tf_sta_name
+  value       = local.tf_sta_name
 }
 
 output "rg_name" {
