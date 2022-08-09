@@ -1,8 +1,13 @@
 locals {
   github_repos_with_apps = {
-    first_test : {
+    shared_infrastructure : {
       github_org  = "badbort"
-      repo        = "backstage-test"
+      repo        = "shared-infrastructure"
+      environment = "tf"
+    }
+    backstage_test : {
+      github_org  = "bortington"
+      repo        = "backstage-testing"
       environment = "tfplan"
     }
   }
