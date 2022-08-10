@@ -20,9 +20,10 @@ resource "azuread_application" "github_actions_aadapplication" {
   }
 }
 
-# resource "azuread_service_principal" "github_actions_sp" {
-  
-# }
+resource "azuread_service_principal" "github_actions_sp" {
+  for_each                     = azuread_application.github_actions_aadapplication
+  app_role_assignment_required = false
+}
 
 resource "azuread_application_federated_identity_credential" "cred" {
   for_each              = local.github_repos_with_apps
