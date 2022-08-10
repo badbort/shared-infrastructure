@@ -1,10 +1,5 @@
 locals {
   github_repos_with_apps = {
-    shared_infrastructure : {
-      github_org  = "badbort"
-      repo        = "shared-infrastructure"
-      environment = "tf"
-    }
     backstage_test : {
       github_org  = "bortington"
       repo        = "backstage-testing"
@@ -23,6 +18,12 @@ resource "azuread_application" "github_actions_aadapplication" {
       required_resource_access
     ]
   }
+}
+
+resource "azuread_service_principal" "github_actions_sp" {
+  for_each                     = azuread_application.github_actions_aadapplication
+  application_id               = each.value.application_id
+  app_role_assignment_required = false
 }
 
 resource "azuread_application_federated_identity_credential" "cred" {
