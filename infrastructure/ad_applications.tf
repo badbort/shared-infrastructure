@@ -22,6 +22,7 @@ resource "azuread_application" "github_actions_aadapplication" {
 
 resource "azuread_service_principal" "github_actions_sp" {
   for_each                     = azuread_application.github_actions_aadapplication
+  application_id               = each.value.application_id
   app_role_assignment_required = false
 }
 
