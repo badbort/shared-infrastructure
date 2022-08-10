@@ -1,7 +1,8 @@
 locals {
   tf_backends = {
     backstage_test : {
-      name = "backstage-testing"
+      name = "backstage-test"
+      repo = "https://github.com/bortington/backstage-test"
     }
   }
 }
@@ -11,4 +12,8 @@ resource "azurerm_storage_container" "tf_backends_sc" {
   name                  = each.value.name
   container_access_type = "private"
   storage_account_name  = azurerm_storage_account.terraform_state_storage.name
+
+  tags = {
+    Repo_URL = each.value.repo
+  }
 }
