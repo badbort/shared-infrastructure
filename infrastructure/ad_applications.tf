@@ -3,7 +3,7 @@ locals {
     backstage_test : {
       github_org  = "bortington"
       repo        = "backstage-testing"
-      environment = "tfplan"
+      environment = "tf"
     }
   }
 }
