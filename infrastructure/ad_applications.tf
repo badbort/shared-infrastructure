@@ -2,7 +2,7 @@ locals {
   github_repos_with_apps = {
     backstage_test : {
       github_org  = "bortington"
-      repo        = "backstage-testing"
+      repo        = "backstage-test"
       environment = "tf"
     }
   }
@@ -28,10 +28,21 @@ resource "azuread_service_principal" "github_actions_sp" {
 
 resource "azuread_application_federated_identity_credential" "cred" {
   for_each              = local.github_repos_with_apps
-  application_object_id = resource.azuread_application.github_actions_aadapplication[each.key].object_id
+  application_object_id = azuread_application.github_actions_aadapplication[each.key].object_id
   display_name          = each.value.repo
   description           = "Terraform deployments for ${each.value.github_org}/${each.value.repo}"
   audiences             = ["api://AzureADTokenExchange"]
   issuer                = "https://token.actions.githubusercontent.com"
   subject               = "repo:${each.value.github_org}/${each.value.repo}:environment:${each.value.environment}"
 }
+
+# data "github_repository" "repo" {
+#   for_each     = local.github_repos_with_apps
+#   full_name = "${each.value.github_org}/${each.value.repo}"
+# }
+
+# resource "github_repository_environment" "repo_env" {
+#   for_each     = local.github_repos_with_apps
+#   environment  = each.value.environment
+#   repository   = data.github_repository.repo[each.key].full_name
+# }
