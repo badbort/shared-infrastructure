@@ -1,14 +1,9 @@
 locals {
   github_repos_with_apps = {
-    shared_infrastructure : {
-      github_org  = "badbort"
-      repo        = "shared-infrastructure"
-      environment = "tf"
-    }
     backstage_test : {
       github_org  = "bortington"
       repo        = "backstage-testing"
-      environment = "tf"
+      environment = "tfplan"
     }
   }
 }
@@ -24,6 +19,10 @@ resource "azuread_application" "github_actions_aadapplication" {
     ]
   }
 }
+
+# resource "azuread_service_principal" "github_actions_sp" {
+  
+# }
 
 resource "azuread_application_federated_identity_credential" "cred" {
   for_each              = local.github_repos_with_apps
