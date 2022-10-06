@@ -5,6 +5,11 @@ locals {
       repo        = "backstage-test"
       environment = "tf"
     }
+    azure-functions-playground : {
+      github_org  = "badbort"
+      repo        = "azure-functions-playground"
+      environment = "prod"
+    }
   }
 }
 
