@@ -10,6 +10,11 @@ locals {
       repo        = "azure-functions-playground"
       environment = "prod"
     }
+    azure-functions-playground : {
+      github_org  = "badbort"
+      repo        = "tf-sandbox"
+      environment = "main"
+    }
   }
 }
 
