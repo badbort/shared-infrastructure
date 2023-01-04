@@ -15,6 +15,11 @@ locals {
       repo        = "tf-sandbox"
       environment = "main"
     }
+    tf-github-repo-management : {
+      github_org  = "badbort"
+      repo        = "tf-github-repo-management"
+      environment = "main"
+    }
   }
 }
 
