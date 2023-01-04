@@ -4,6 +4,10 @@ locals {
       name = "backstage-test"
       repo = "https://github.com/bortington/backstage-test"
     }
+    tf-github-repo-management : {
+      name = "tf-github-repo-management"
+      repo = "https://github.com/badbort/tf-github-repo-management"
+    }
   }
 }
 
