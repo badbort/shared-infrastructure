@@ -60,13 +60,13 @@ resource "azuread_application_federated_identity_credential" "cred" {
 }
 
 resource "azurerm_resource_group" "instance" {
-  for_each = resource_groups
+  for_each = local.resource_groups
   name     = each.value.resource_group
   location = "Australia East"
 }
 
 resource "azurerm_role_assignment" "instance" {
-  for_each             = resource_groups
+  for_each             = local.resource_groups
   principal_id         = azuread_application.github_actions_aadapplication[each.key].object_id
   role_definition_name = "Contributor"
   scope                = azurerm_resource_group.instance[each.key].id
