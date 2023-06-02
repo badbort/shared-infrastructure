@@ -71,14 +71,3 @@ resource "azurerm_role_assignment" "instance" {
   role_definition_name = "Contributor"
   scope                = azurerm_resource_group.instance[each.key].id
 }
-
-# data "github_repository" "repo" {
-#   for_each     = local.github_repos_with_apps
-#   full_name = "${each.value.github_org}/${each.value.repo}"
-# }
-
-# resource "github_repository_environment" "repo_env" {
-#   for_each     = local.github_repos_with_apps
-#   environment  = each.value.environment
-#   repository   = data.github_repository.repo[each.key].full_name
-# }
