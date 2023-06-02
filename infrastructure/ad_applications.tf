@@ -20,6 +20,11 @@ locals {
       repo        = "tf-github-repo-management"
       environment = "main"
     }
+    apim-managed-test-dev : {
+      github_org  = "badbort"
+      repo        = "apim-managed-test"
+      environment = "dev"
+    }
   }
 }
 
