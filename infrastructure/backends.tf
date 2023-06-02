@@ -8,6 +8,10 @@ locals {
       name = "tf-github-repo-management"
       repo = "https://github.com/badbort/tf-github-repo-management"
     }
+    apim-managed-test : {
+      name = "apim-managed-test"
+      repo = "https://github.com/badbort/apim-managed-test"
+    }
   }
 }
 
