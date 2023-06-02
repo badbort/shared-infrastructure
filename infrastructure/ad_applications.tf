@@ -67,7 +67,7 @@ resource "azurerm_resource_group" "instance" {
 
 resource "azurerm_role_assignment" "instance" {
   for_each             = local.resource_groups
-  principal_id         = azuread_application.github_actions_aadapplication[each.key].object_id
+  principal_id         = azuread_service_principal.github_actions_sp[each.key].object_id
   role_definition_name = "Contributor"
   scope                = azurerm_resource_group.instance[each.key].id
 }
