@@ -21,11 +21,14 @@ locals {
       environment = "main"
     }
     apim-managed-test-dev : {
-      github_org  = "badbort"
-      repo        = "apim-managed-test"
-      environment = "dev"
+      github_org     = "badbort"
+      repo           = "apim-managed-test"
+      environment    = "dev"
+      resource_group = "rg-apim-managed-test"
     }
   }
+
+  resource_groups = {for key, value in local.github_repos_with_apps : key => value if try(value.resource_group, null) != null}
 }
 
 resource "azuread_application" "github_actions_aadapplication" {
@@ -54,6 +57,19 @@ resource "azuread_application_federated_identity_credential" "cred" {
   audiences             = ["api://AzureADTokenExchange"]
   issuer                = "https://token.actions.githubusercontent.com"
   subject               = "repo:${each.value.github_org}/${each.value.repo}:environment:${each.value.environment}"
+}
+
+resource "azurerm_resource_group" "instance" {
+  for_each = resource_groups
+  name     = each.value.resource_group
+  location = "Australia East"
+}
+
+resource "azurerm_role_assignment" "instance" {
+  for_each             = resource_groups
+  principal_id         = azuread_application.github_actions_aadapplication[each.key].object_id
+  role_definition_name = "Contributor"
+  scope                = azurerm_resource_group.instance[each.key].id
 }
 
 # data "github_repository" "repo" {
