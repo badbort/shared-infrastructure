@@ -21,11 +21,14 @@ locals {
       environment = "main"
     }
     apim-managed-test-dev : {
-      github_org  = "badbort"
-      repo        = "apim-managed-test"
-      environment = "dev"
+      github_org     = "badbort"
+      repo           = "apim-managed-test"
+      environment    = "dev"
+      resource_group = "rg-apim-managed-test"
     }
   }
+
+  resource_groups = { for key, value in local.github_repos_with_apps : key => value if try(value.resource_group, null) != null }
 }
 
 resource "azuread_application" "github_actions_aadapplication" {
@@ -56,13 +59,15 @@ resource "azuread_application_federated_identity_credential" "cred" {
   subject               = "repo:${each.value.github_org}/${each.value.repo}:environment:${each.value.environment}"
 }
 
-# data "github_repository" "repo" {
-#   for_each     = local.github_repos_with_apps
-#   full_name = "${each.value.github_org}/${each.value.repo}"
-# }
+resource "azurerm_resource_group" "instance" {
+  for_each = local.resource_groups
+  name     = each.value.resource_group
+  location = "Australia East"
+}
 
-# resource "github_repository_environment" "repo_env" {
-#   for_each     = local.github_repos_with_apps
-#   environment  = each.value.environment
-#   repository   = data.github_repository.repo[each.key].full_name
-# }
+resource "azurerm_role_assignment" "instance" {
+  for_each             = local.resource_groups
+  principal_id         = azuread_application.github_actions_aadapplication[each.key].object_id
+  role_definition_name = "Contributor"
+  scope                = azurerm_resource_group.instance[each.key].id
+}
