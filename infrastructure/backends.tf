@@ -12,6 +12,10 @@ locals {
       name = "apim-managed-test"
       repo = "https://github.com/badbort/apim-managed-test"
     }
+    telemetry-test : {
+      name = "telemetry-test"
+      repo = "https://github.com/bortington/telemetry-test"
+    }
   }
 }
 
