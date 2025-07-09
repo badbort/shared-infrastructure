@@ -30,6 +30,7 @@ locals {
       github_org     = "bortington"
       repo           = "telemetry-test"
       environment    = "primary"
+      resource_group = "rg-telemetry-test"
     }
   }
 
