@@ -31,10 +31,28 @@ locals {
       repo           = "telemetry-test"
       environment    = "primary"
       resource_group = "rg-telemetry-test"
+      role_assignments = [
+        "Storage Blob Data Owner",
+        "Storage Table Data Contributor",
+        "Azure Service Bus Data Owner",
+        "Storage File Data Privileged Contributor",
+        "Storage File Data SMB Share Elevated Contributor",
+        "Owner",
+        "User Access Administrator",  
+      ]
     }
   }
 
   resource_groups = { for key, value in local.github_repos_with_apps : key => value if try(value.resource_group, null) != null }
+
+  custom_role_assignments = flatten([
+    for repo_key, repo in local.github_repos_with_apps : [
+      for role in try(repo.role_assignments, []) : {
+        repo_key             = repo_key
+        role_definition_name = role
+      }
+    ]
+  ])
 }
 
 resource "azuread_application" "github_actions_aadapplication" {
@@ -76,4 +94,15 @@ resource "azurerm_role_assignment" "instance" {
   principal_id         = azuread_service_principal.github_actions_sp[each.key].object_id
   role_definition_name = "Contributor"
   scope                = azurerm_resource_group.instance[each.key].id
+}
+
+resource "azurerm_role_assignment" "custom_rg_assignments" {
+  for_each = {
+    for ra in local.custom_role_assignments :
+    "${ra.repo_key}-${replace(lower(ra.role_definition_name), " ", "-")}" => ra
+  }
+
+  principal_id         = azuread_service_principal.github_actions_sp[each.value.repo_key].object_id
+  role_definition_name = each.value.role_definition_name
+  scope                = azurerm_resource_group.instance[each.value.repo_key].id
 }
