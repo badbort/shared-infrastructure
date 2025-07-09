@@ -56,7 +56,7 @@ resource "azuread_service_principal" "github_actions_sp" {
 
 resource "azuread_application_federated_identity_credential" "cred" {
   for_each              = local.github_repos_with_apps
-  application_object_id = azuread_application.github_actions_aadapplication[each.key].id
+  application_id        = azuread_application.github_actions_aadapplication[each.key].id
   display_name          = each.value.repo
   description           = "Terraform deployments for ${each.value.github_org}/${each.value.repo}"
   audiences             = ["api://AzureADTokenExchange"]
