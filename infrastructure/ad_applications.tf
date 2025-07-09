@@ -26,6 +26,11 @@ locals {
       environment    = "dev"
       resource_group = "rg-apim-managed-test"
     }
+    telemetry-test : {
+      github_org     = "bortington"
+      repo           = "telemetry-test"
+      environment    = "primary"
+    }
   }
 
   resource_groups = { for key, value in local.github_repos_with_apps : key => value if try(value.resource_group, null) != null }
