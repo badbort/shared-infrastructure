@@ -123,7 +123,7 @@ resource "azurerm_storage_container" "ad_tf_backends" {
 
 resource "azurerm_role_assignment" "backend_ad_blob_contributor" {
   for_each             = local.ad_tf_backends
-  principal_id         = azuread_service_principal.github_actions_sp[each.value.repo_key].object_id
+  principal_id         = azuread_service_principal.github_actions_sp[each.key].object_id
   role_definition_name = "Storage Blob Data Contributor"
-  scope                = azurerm_storage_container.ad_tf_backends[each.key].id
+  scope                = azurerm_storage_account.terraform_state_storage.id
 }
