@@ -31,6 +31,7 @@ locals {
       repo           = "telemetry-test"
       environment    = "primary"
       resource_group = "rg-telemetry-test"
+      backend         = "telemetry-test" 
       role_assignments = [
         "Storage Blob Data Owner",
         "Storage Table Data Contributor",
@@ -53,6 +54,8 @@ locals {
       }
     ]
   ])
+
+  ad_tf_backends = { for key, value in local.github_repos_with_apps : key => value if try(value.backend, null) != null }
 }
 
 resource "azuread_application" "github_actions_aadapplication" {
@@ -105,4 +108,22 @@ resource "azurerm_role_assignment" "custom_rg_assignments" {
   principal_id         = azuread_service_principal.github_actions_sp[each.value.repo_key].object_id
   role_definition_name = each.value.role_definition_name
   scope                = azurerm_resource_group.instance[each.value.repo_key].id
+}
+
+resource "azurerm_storage_container" "ad_tf_backends" {
+  for_each              = local.ad_tf_backends
+  name                  = each.value.backend
+  container_access_type = "private"
+  storage_account_name  = azurerm_storage_account.terraform_state_storage.name
+  metadata = {
+    repo = each.value.repo
+    github_org = each.value.github_org
+  }
+}
+
+resource "azurerm_role_assignment" "backend_ad_blob_contributor" {
+  for_each             = local.resource_groups
+  principal_id         = azuread_service_principal.github_actions_sp[each.key].object_id
+  role_definition_name = "Storage Blob Data Contributor"
+  scope                = azurerm_storage_container.ad_tf_backends[each.key].id
 }
