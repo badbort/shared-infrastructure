@@ -36,11 +36,12 @@ locals {
         "Storage Blob Data Owner",
         "Storage Table Data Contributor",
         "Azure Service Bus Data Owner",
+        "Storage File Data Contributor",
         "Storage File Data Privileged Contributor",
         "Storage File Data SMB Share Contributor",
         "Storage File Data SMB Share Elevated Contributor",
         "Owner",
-        "User Access Administrator",  
+        "User Access Administrator"
       ]
     }
   }
