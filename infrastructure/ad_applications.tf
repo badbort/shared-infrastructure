@@ -41,7 +41,8 @@ locals {
         "Storage File Data SMB Share Elevated Contributor",
         "Owner",
         "User Access Administrator",
-        "Azure Service Bus Data Owner"
+        "Azure Service Bus Data Owner",
+        "Key Vault Administrator"
       ]
     }
   }
