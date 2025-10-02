@@ -12,6 +12,10 @@ locals {
       name = "apim-managed-test"
       repo = "https://github.com/badbort/apim-managed-test"
     }
+    infra-azure-foundations : {
+      name = "infra-azure-foundations"
+      repo = "https://github.com/badbort/infra-azure-foundations"
+    }
   }
 }
 
