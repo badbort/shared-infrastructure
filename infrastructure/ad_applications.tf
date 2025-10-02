@@ -55,7 +55,6 @@ locals {
       github_org  = "badbort"
       repo        = "infra-azure-foundations"
       environment = "preview"
-      backend     = "infra-azure-foundations"
     }
   }
 
