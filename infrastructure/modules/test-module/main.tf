@@ -3,10 +3,10 @@ variable "test_var" {
 }
 
 resource "null_resource" "test" {
-   triggers = {
+  triggers = {
     name = var.test_var
   }
-  
+
   provisioner "local-exec" {
     when        = create
     command     = "Write-Output \"Hello ${var.test_var}\""

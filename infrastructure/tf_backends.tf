@@ -1,4 +1,5 @@
 locals {
+  // Use github_repos_with_apps instead
   tf_backends = {
     backstage_test : {
       name = "backstage-test"
@@ -12,10 +13,6 @@ locals {
       name = "apim-managed-test"
       repo = "https://github.com/badbort/apim-managed-test"
     }
-    infra-azure-foundations : {
-      name = "infra-azure-foundations"
-      repo = "https://github.com/badbort/infra-azure-foundations"
-    }
   }
 }
 
@@ -23,8 +20,11 @@ resource "azurerm_storage_container" "tf_backends_sc" {
   for_each              = local.tf_backends
   name                  = each.value.name
   container_access_type = "private"
-  storage_account_name  = azurerm_storage_account.terraform_state_storage.name
+  storage_account_id    = azurerm_storage_account.terraform_state_storage.id
   metadata = {
     repo = each.value.repo
+  }
+
+  lifecycle {
   }
 }
