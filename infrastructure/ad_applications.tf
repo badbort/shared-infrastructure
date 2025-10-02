@@ -31,7 +31,7 @@ locals {
       repo           = "telemetry-test"
       environment    = "primary"
       resource_group = "rg-telemetry-test"
-      backend         = "telemetry-test" 
+      backend        = "telemetry-test"
       role_assignments = [
         "Storage Account Contributor",
         "Storage Blob Data Owner",
@@ -44,6 +44,18 @@ locals {
         "Azure Service Bus Data Owner",
         "Key Vault Administrator"
       ]
+    }
+    infra-azure-foundations-infra : {
+      github_org  = "badbort"
+      repo        = "infra-azure-foundations"
+      environment = "infra"
+      backend     = "infra-azure-foundations"
+    }
+    infra-azure-foundations-preview : {
+      github_org  = "badbort"
+      repo        = "infra-azure-foundations"
+      environment = "preview"
+      backend     = "infra-azure-foundations"
     }
   }
 
@@ -80,13 +92,13 @@ resource "azuread_service_principal" "github_actions_sp" {
 }
 
 resource "azuread_application_federated_identity_credential" "cred" {
-  for_each              = local.github_repos_with_apps
-  application_id        = azuread_application.github_actions_aadapplication[each.key].id
-  display_name          = each.value.repo
-  description           = "Terraform deployments for ${each.value.github_org}/${each.value.repo}"
-  audiences             = ["api://AzureADTokenExchange"]
-  issuer                = "https://token.actions.githubusercontent.com"
-  subject               = "repo:${each.value.github_org}/${each.value.repo}:environment:${each.value.environment}"
+  for_each       = local.github_repos_with_apps
+  application_id = azuread_application.github_actions_aadapplication[each.key].id
+  display_name   = each.value.repo
+  description    = "Terraform deployments for ${each.value.github_org}/${each.value.repo}"
+  audiences      = ["api://AzureADTokenExchange"]
+  issuer         = "https://token.actions.githubusercontent.com"
+  subject        = "repo:${each.value.github_org}/${each.value.repo}:environment:${each.value.environment}"
 }
 
 resource "azurerm_resource_group" "instance" {
@@ -118,9 +130,14 @@ resource "azurerm_storage_container" "ad_tf_backends" {
   name                  = each.value.backend
   container_access_type = "private"
   storage_account_name  = azurerm_storage_account.terraform_state_storage.name
+  storage_account_id    = azurerm_storage_account.terraform_state_storage.id
   metadata = {
-    repo = each.value.repo
+    repo       = each.value.repo
     github_org = each.value.github_org
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
