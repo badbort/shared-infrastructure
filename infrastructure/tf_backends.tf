@@ -20,7 +20,7 @@ resource "azurerm_storage_container" "tf_backends_sc" {
   for_each              = local.tf_backends
   name                  = each.value.name
   container_access_type = "private"
-  storage_account_id    = azurerm_storage_account.terraform_state_storage.name
+  storage_account_id    = azurerm_storage_account.terraform_state_storage.id
   metadata = {
     repo = each.value.repo
   }
