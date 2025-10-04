@@ -36,6 +36,7 @@ locals {
     ]
   ])
 
+  
   # Distinct list of all reader display names
   secret_reader_names = distinct([for p in local.secret_reader_pairs : p.reader_name])
   principal_by_name = {
@@ -51,7 +52,7 @@ locals {
         key_type = "RSA"
         key_size = 2048
         curve    = null
-        key_ops  = ["wrapKey", "unwrapKey"] # good default for KMS use
+        key_ops  = ["encrypt", "decrypt"] # good default for KMS use
         tags     = {}
         readers  = try(v.readers, [])
       },
