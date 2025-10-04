@@ -27,7 +27,7 @@ locals {
 }
 
 resource "azurerm_key_vault" "pulumi_kv" {
-  name                          = "pulumi-passphrases"
+  name                          = "kv-badbort-pulumi-pw"
   tenant_id                     = data.azuread_client_config.current.tenant_id
   location                      = azurerm_resource_group.rg.location
   resource_group_name           = azurerm_resource_group.rg.name
