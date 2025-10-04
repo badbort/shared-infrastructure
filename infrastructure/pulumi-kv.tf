@@ -1,6 +1,6 @@
 locals {
   pulumi_passphrases = {
-    infra-azure-foundations : {
+    infra-azure-foundations-tenant-adi : {
       readers : [
         "github-actions-infra-azure-foundations-infra",
         "github-actions-infra-azure-foundations-preview"
