@@ -66,5 +66,5 @@ resource "azurerm_role_assignment" "secret_readers" {
 
   scope              = "${azurerm_key_vault.pulumi_kv.id}/secrets/${each.value.secret_name}"
   role_definition_id = "Key Vault Secrets User"
-  principal_id       = local.principal_by_name[each.value.reader_name]
+  principal_id       = local.principal_by_name[each.value.reader_name].object_id
 }
