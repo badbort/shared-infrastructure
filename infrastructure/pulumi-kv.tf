@@ -2,7 +2,8 @@ locals {
   pulumi_passphrases = {
     infra-azure-foundations : {
       readers : [
-        "infra-azure-foundations-"
+        "infra-azure-foundations-infra",
+        "infra-azure-foundations-preview"
       ]
     }
   }
