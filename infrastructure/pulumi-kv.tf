@@ -2,8 +2,8 @@ locals {
   pulumi_passphrases = {
     infra-azure-foundations : {
       readers : [
-        "infra-azure-foundations-infra",
-        "infra-azure-foundations-preview"
+        "github-actions-infra-azure-foundations-infra",
+        "github-actions-infra-azure-foundations-preview"
       ]
     }
   }
@@ -16,7 +16,6 @@ locals {
       }
     ]
   ])
-
 
   # Distinct list of all reader display names
   secret_reader_names = distinct([for p in local.secret_reader_pairs : p.reader_name])
