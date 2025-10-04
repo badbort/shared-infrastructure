@@ -19,6 +19,11 @@ locals {
 
   # Distinct list of all reader display names
   secret_reader_names = distinct([for p in local.secret_reader_pairs : p.reader_name])
+
+  principal_by_name = {
+    for sp in data.azuread_service_principals.secret_readers.service_principals :
+    sp.display_name => sp
+  }
 }
 
 resource "azurerm_key_vault" "pulumi_kv" {
@@ -61,5 +66,5 @@ resource "azurerm_role_assignment" "secret_readers" {
 
   scope              = "${azurerm_key_vault.pulumi_kv.id}/secrets/${each.value.secret_name}"
   role_definition_id = "Key Vault Secrets User"
-  principal_id       = data.azuread_service_principals.secret_readers[each.value.reader_name].object_ids
+  principal_id       = local.principal_by_name[each.value.reader_name]
 }
