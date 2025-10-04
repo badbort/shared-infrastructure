@@ -1,5 +1,5 @@
 provider "azurerm" {
-  subscription_id            = "bd8e250a-66a6-4038-acd8-0d6aced3e3c8"
+  subscription_id = "bd8e250a-66a6-4038-acd8-0d6aced3e3c8"
 
   features {}
 }
