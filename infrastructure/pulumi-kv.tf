@@ -45,7 +45,7 @@ resource "random_password" "pass" {
   numeric  = true
 }
 
-resource "azurerm_key_vault_secret" "secrets" {
+resource "azurerm_key_vault_secret" "pulumi_secrets" {
   for_each     = local.pulumi_passphrases
   name         = each.key
   value        = random_password.pass[each.key].result
@@ -64,7 +64,8 @@ resource "azurerm_role_assignment" "secret_readers" {
     "${p.secret_name}|${p.reader_name}" => p
   }
 
-  scope              = "${azurerm_key_vault.pulumi_kv.id}/secrets/${each.value.secret_name}"
+  # scope              = "${azurerm_key_vault.pulumi_kv.id}/secrets/${each.value.secret_name}"
+  scope              = azurerm_key_vault_secret.pulumi_secrets[each.value.secret_name].versionless_id
   role_definition_id = "Key Vault Secrets User"
   principal_id       = local.principal_by_name[each.value.reader_name].object_id
 }
