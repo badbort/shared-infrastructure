@@ -13,6 +13,10 @@ locals {
       name = "apim-managed-test"
       repo = "https://github.com/badbort/apim-managed-test"
     }
+    hackathon-2026: {
+      name = "apim-managed-test"
+      repo = "https://github.com/racwasandbox/hackathon-spec-driven"
+    }
   }
 }
 
