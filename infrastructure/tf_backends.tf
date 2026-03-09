@@ -14,7 +14,7 @@ locals {
       repo = "https://github.com/badbort/apim-managed-test"
     }
     hackathon-2026: {
-      name = "apim-managed-test"
+      name = "hackathon-2026"
       repo = "https://github.com/racwasandbox/hackathon-spec-driven"
     }
   }
