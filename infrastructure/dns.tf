@@ -1,7 +1,6 @@
 locals {
   dns_zone_name = "badbort.com"
 
-  # Low TTL is useful during PoC — easy to bump up for production
   dns_default_ttl = 300
 
   dns_a_records = {
@@ -11,7 +10,7 @@ locals {
   }
 
   dns_cname_records = {
-    # "api" = { record = "some.target.example.com" }
+    "uplift-poc" = { records = ["https://lemon-meadow-04802f31e.4.azurestaticapps.net"] }
   }
 
   dns_txt_records = {
