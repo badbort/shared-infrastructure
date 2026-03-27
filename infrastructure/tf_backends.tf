@@ -17,6 +17,10 @@ locals {
       name = "hackathon-2026"
       repo = "https://github.com/racwasandbox/hackathon-spec-driven"
     }
+    uplift-2026: {
+      name = "uplift-2026"
+      repo = "https://github.com/badbort/uplift-2026"
+    }
   }
 }
 
