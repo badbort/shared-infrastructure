@@ -10,7 +10,7 @@ locals {
   }
 
   dns_cname_records = {
-    "uplift-poc" = { records = ["https://lemon-meadow-04802f31e.4.azurestaticapps.net"] }
+    "uplift-poc" = "lemon-meadow-04802f31e.4.azurestaticapps.net"
   }
 
   dns_txt_records = {
@@ -57,8 +57,8 @@ resource "azurerm_dns_cname_record" "records" {
   name                = each.key
   zone_name           = azurerm_dns_zone.badbort.name
   resource_group_name = module.common.rg_name
-  ttl                 = try(each.value.ttl, local.dns_default_ttl)
-  record              = each.value.record
+  ttl                 = local.dns_default_ttl
+  record              = each.value
   tags                = var.resource_tags
 }
 
