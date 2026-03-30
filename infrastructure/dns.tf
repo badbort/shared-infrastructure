@@ -15,6 +15,7 @@ locals {
 
   dns_txt_records = {
     # "@" = { records = ["v=spf1 -all"] }
+    "uplift-poc" = { records = ["_yvu3u42syke27epm1wrrjrqbur2ue3n"] }
   }
 
   dns_mx_records = {
