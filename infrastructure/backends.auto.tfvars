@@ -29,4 +29,12 @@ ad_backends = {
     ]
     pulumi_keys = ["infra-azure-frontdoor"]
   }
+  shared-services = {
+    name = "shared-services"
+    repo = "https://github.com/badbort/shared-services"
+    identities = [
+      "github-actions-shared-services-infra",
+      "github-actions-shared-services-plan",
+    ]
+  }
 }
