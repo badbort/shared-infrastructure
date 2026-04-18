@@ -79,7 +79,7 @@ resource "azurerm_key_vault" "pulumi_kv" {
   location                      = azurerm_resource_group.rg.location
   resource_group_name           = azurerm_resource_group.rg.name
   rbac_authorization_enabled    = true
-  soft_delete_retention_days    = 90
+  soft_delete_retention_days    = 30
   purge_protection_enabled      = true
   sku_name                      = "standard"
   public_network_access_enabled = true
