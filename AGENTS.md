@@ -18,21 +18,26 @@ identity, or their own SP). This repo only grants that identity access to a
 state container (and, for Pulumi, a Key Vault KMS key for state encryption).
 
 Canonical examples to copy: **`uplift-2026`** (Terraform) and
-**`infra-azure-frontdoor`** (Pulumi) in `ad_backends.tf`.
+**`infra-azure-frontdoor`** (Pulumi) in `backends.auto.tfvars`.
 
 ---
 
 ## Adding a backend
 
-Everything goes in **`ad_backends.tf`** under `local.ad_backends`. One entry
-per backend.
+Everything goes in **`infrastructure/backends.auto.tfvars`** under the
+`ad_backends` map. The object schema is defined in `variables.tf` and
+consumed by `ad_backends.tf` / `pulumi-kv.tf`. One entry per backend.
 
 ```hcl
-my-new-repo : {
-  name        = "my-new-repo"                         # blob container name
-  repo        = "https://github.com/badbort/my-new-repo"
-  identities  = ["github-actions-my-new-repo"]        # optional, existing SPs
-  pulumi_keys = ["my-new-repo-prod"]                  # optional, KMS key names
+# infrastructure/backends.auto.tfvars
+ad_backends = {
+  # ...existing entries...
+  my-new-repo = {
+    name        = "my-new-repo"                       # blob container name
+    repo        = "https://github.com/badbort/my-new-repo"
+    identities  = ["github-actions-my-new-repo"]      # optional, existing SPs
+    pulumi_keys = ["my-new-repo-prod"]                # optional, KMS key names
+  }
 }
 ```
 
@@ -81,9 +86,10 @@ Crypto User role.
 1. Confirm the consumer repo's identity (SP display name) already exists in
    the tenant. If not, ask the user — do **not** add it to
    `ad_applications.tf`.
-2. Add an entry to `local.ad_backends` in `ad_backends.tf` modeled on
+2. Add an entry to `ad_backends` in `backends.auto.tfvars` modeled on
    `uplift-2026` (with `identities`) or `hackathon-2026` (without). For
-   Pulumi, also set `pulumi_keys = ["<key-name>", ...]`.
+   Pulumi, also set `pulumi_keys = ["<key-name>", ...]`. The schema lives
+   in `variables.tf`; do not edit `ad_backends.tf` or `pulumi-kv.tf`.
 3. Run `terraform plan` from `infrastructure/` and confirm only the intended
    additions. Apply.
 4. Report back: container name, KV key names (if Pulumi), and the SPs

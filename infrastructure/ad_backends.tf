@@ -1,62 +1,17 @@
 locals {
-  # Source of truth for state backends. Consumer repos manage their own
-  # identity (existing AAD SP display names listed in `identities`); this repo
-  # only creates the blob container and grants access.
-  #
-  # Fields:
-  #   name       - blob container name in badbortcommontfstatesta
-  #   repo       - recorded as container metadata (informational)
-  #   identities - optional list of existing SP display names granted
-  #                Storage Blob Data Contributor on the container
-  #   pulumi_keys - optional list(string) of Pulumi KMS key names. For each
-  #                 name, an RSA key with that name is created in
-  #                 kv-badbort-pulumi-pw and the backend's `identities` gain
-  #                 Key Vault Crypto User on it. Used as the Pulumi stack
-  #                 `secrets-provider` (azurekeyvault://.../keys/<name>).
-  #                 See pulumi-kv.tf.
-  ad_backends = {
-    backstage_test : {
-      name = "backstage-test"
-      repo = "https://github.com/bortington/backstage-test"
-    }
-    tf-github-repo-management : {
-      name = "tf-github-repo-management"
-      repo = "https://github.com/badbort/tf-github-repo-management"
-    }
-    apim-managed-test : {
-      name = "apim-managed-test"
-      repo = "https://github.com/badbort/apim-managed-test"
-    }
-    hackathon-2026 : {
-      name = "hackathon-2026"
-      repo = "https://github.com/racwasandbox/hackathon-spec-driven"
-    }
-    uplift-2026 : {
-      name       = "uplift-2026"
-      repo       = "https://github.com/badbort/uplift-2026"
-      identities = ["github-actions-uplift-2026"]
-    }
-    infra-azure-frontdoor : {
-      name = "infra-azure-foundfrontdoorations"
-      repo = "https://github.com/badbort/infra-azure-frontdoor"
-      identities = [
-        "github-actions-infra-azure-frontdoor-infra",
-        "github-actions-infra-azure-frontdoor-preview",
-      ]
-      pulumi_keys = ["infra-azure-frontdoor"]
-    }
-  }
+  # Source of truth is var.ad_backends (see variables.tf for the object
+  # schema, backends.auto.tfvars for the values).
 
   // Unique set of all SP display names that need blob access across all backends
   ad_backend_identity_names = toset(flatten([
-    for k, v in local.ad_backends : try(v.identities, [])
+    for k, v in var.ad_backends : v.identities
   ]))
 
   // Flat map of backend+identity pairs for role assignment
   ad_backend_identity_assignments = {
     for pair in flatten([
-      for backend_key, backend in local.ad_backends : [
-        for identity in try(backend.identities, []) : {
+      for backend_key, backend in var.ad_backends : [
+        for identity in backend.identities : {
           key         = "${backend_key}-${identity}"
           backend_key = backend_key
           identity    = identity
@@ -79,14 +34,11 @@ resource "azurerm_role_assignment" "tf_backend_blob_contributor" {
 }
 
 resource "azurerm_storage_container" "tf_backends_sc" {
-  for_each              = local.ad_backends
+  for_each              = var.ad_backends
   name                  = each.value.name
   container_access_type = "private"
   storage_account_id    = azurerm_storage_account.terraform_state_storage.id
   metadata = {
     repo = each.value.repo
-  }
-
-  lifecycle {
   }
 }
