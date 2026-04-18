@@ -120,9 +120,6 @@ resource "azurerm_storage_container" "ad_tf_backends" {
     github_org = each.value.github_org
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_role_assignment" "backend_ad_blob_contributor" {
