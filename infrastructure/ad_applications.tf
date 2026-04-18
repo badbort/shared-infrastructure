@@ -25,12 +25,6 @@ locals {
       repo        = "tf-github-repo-management"
       environment = "main"
     }
-    apim-managed-test-dev : {
-      github_org     = "badbort"
-      repo           = "apim-managed-test"
-      environment    = "dev"
-      resource_group = "rg-apim-managed-test"
-    }
     infra-azure-foundations-infra : {
       github_org  = "badbort"
       repo        = "infra-azure-foundations"

@@ -8,11 +8,12 @@ locals {
   #   repo       - recorded as container metadata (informational)
   #   identities - optional list of existing SP display names granted
   #                Storage Blob Data Contributor on the container
-  #   passphrase - optional list(string) of Pulumi stack names. For each name,
-  #                a passphrase secret and KMS key with that name are created
-  #                in kv-badbort-pulumi-pw, and `identities` gain Key Vault
-  #                Secrets User + Key Vault Crypto User on them. See
-  #                pulumi-kv.tf.
+  #   pulumi_keys - optional list(string) of Pulumi KMS key names. For each
+  #                 name, an RSA key with that name is created in
+  #                 kv-badbort-pulumi-pw and the backend's `identities` gain
+  #                 Key Vault Crypto User on it. Used as the Pulumi stack
+  #                 `secrets-provider` (azurekeyvault://.../keys/<name>).
+  #                 See pulumi-kv.tf.
   ad_backends = {
     backstage_test : {
       name = "backstage-test"
@@ -42,7 +43,7 @@ locals {
         "github-actions-infra-azure-frontdoor-infra",
         "github-actions-infra-azure-frontdoor-preview",
       ]
-      passphrase = ["infra-azure-frontdoor"]
+      pulumi_keys = ["infra-azure-frontdoor"]
     }
   }
 

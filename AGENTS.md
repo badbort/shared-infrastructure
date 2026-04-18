@@ -15,10 +15,10 @@ deprecated — it provisions AAD apps and service principals on behalf of
 consumer repos, which is no longer the preferred pattern. Consumer repos
 should manage their own identity (workload identity, user-assigned managed
 identity, or their own SP). This repo only grants that identity access to a
-state container (and, for Pulumi, a Key Vault secret + key).
+state container (and, for Pulumi, a Key Vault KMS key for state encryption).
 
 Canonical examples to copy: **`uplift-2026`** (Terraform) and
-**`infra-azure-foundations`** (Pulumi) in `ad_backends.tf`.
+**`infra-azure-frontdoor`** (Pulumi) in `ad_backends.tf`.
 
 ---
 
@@ -29,10 +29,10 @@ per backend.
 
 ```hcl
 my-new-repo : {
-  name       = "my-new-repo"                          # blob container name
-  repo       = "https://github.com/badbort/my-new-repo"
-  identities = ["github-actions-my-new-repo"]         # optional, existing SPs
-  passphrase = ["my-new-repo-prod"]                   # optional, Pulumi stack names
+  name        = "my-new-repo"                         # blob container name
+  repo        = "https://github.com/badbort/my-new-repo"
+  identities  = ["github-actions-my-new-repo"]        # optional, existing SPs
+  pulumi_keys = ["my-new-repo-prod"]                  # optional, KMS key names
 }
 ```
 
@@ -45,13 +45,11 @@ Fields:
   `hackathon-2026`) if access is granted out-of-band. SPs must already exist
   in the tenant — they are resolved via `data "azuread_service_principal"`
   and a missing SP fails the plan.
-- `passphrase` — optional `list(string)` of Pulumi stack names. For each
-  name, a passphrase secret and KMS key with that exact name are created in
-  `kv-badbort-pulumi-pw`, and the backend's `identities` gain **Key Vault
-  Secrets User** (on the secret) + **Key Vault Crypto User** (on the key).
-  Merged into `pulumi_passphrases` / `pulumi_keys` in `pulumi-kv.tf`
-  automatically. Supply multiple names to share one state container across
-  several Pulumi stacks.
+- `pulumi_keys` — optional `list(string)` of Pulumi KMS key names. For each
+  name, an RSA key with that exact name is created in `kv-badbort-pulumi-pw`
+  and the backend's `identities` gain **Key Vault Crypto User** on it.
+  Merged into `pulumi_keys` in `pulumi-kv.tf` automatically. Supply multiple
+  names to share one state container across several Pulumi stacks.
 
 Consumer repo's Terraform `backend.tf`:
 
@@ -66,12 +64,15 @@ backend "azurerm" {
 }
 ```
 
-Consumer repo using Pulumi (for each stack name in `passphrase`):
+Consumer repo using Pulumi (for each key name in `pulumi_keys`):
 
-- Backend: `azblob://my-new-repo?storage_account=badbortcommontfstatesta`
-- Passphrase: pulled from KV secret `<stack-name>` in `kv-badbort-pulumi-pw`
+- Backend URL:
+  `azblob://my-new-repo?storage_account=badbortcommontfstatesta`
 - Secrets provider:
-  `azurekeyvault://kv-badbort-pulumi-pw.vault.azure.net/keys/<stack-name>`
+  `azurekeyvault://kv-badbort-pulumi-pw.vault.azure.net/keys/<key-name>`
+
+No passphrase env var needed — Pulumi uses the KMS key directly via the
+Crypto User role.
 
 ---
 
@@ -82,8 +83,8 @@ Consumer repo using Pulumi (for each stack name in `passphrase`):
    `ad_applications.tf`.
 2. Add an entry to `local.ad_backends` in `ad_backends.tf` modeled on
    `uplift-2026` (with `identities`) or `hackathon-2026` (without). For
-   Pulumi, also set `passphrase = ["<stack-name>", ...]`.
+   Pulumi, also set `pulumi_keys = ["<key-name>", ...]`.
 3. Run `terraform plan` from `infrastructure/` and confirm only the intended
    additions. Apply.
-4. Report back: container name, KV secret/key names (if Pulumi), and the SPs
+4. Report back: container name, KV key names (if Pulumi), and the SPs
    that were granted access.

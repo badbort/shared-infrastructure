@@ -23,6 +23,20 @@ resource "azurerm_storage_account" "terraform_state_storage" {
   min_tls_version          = "TLS1_2"
   location                 = azurerm_resource_group.rg.location
   resource_group_name      = azurerm_resource_group.rg.name
+
+  blob_properties {
+    versioning_enabled            = true
+    change_feed_enabled           = true
+    last_access_time_enabled      = true
+
+    delete_retention_policy {
+      days = 30
+    }
+
+    container_delete_retention_policy {
+      days = 30
+    }
+  }
 }
 
 resource "azurerm_storage_container" "terraform_state" {

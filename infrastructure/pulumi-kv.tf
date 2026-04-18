@@ -1,35 +1,8 @@
 locals {
-  # Explicitly-declared Pulumi passphrases. Additional entries are merged in
-  # from ad_backends.tf where an entry sets `passphrase = true`.
-  pulumi_passphrases_explicit = {
-    infra-azure-foundations-stack-adi-tenant : {
-      readers : [
-        "github-actions-infra-azure-foundations-infra",
-        "github-actions-infra-azure-foundations-preview"
-      ]
-    }
-  }
-
-  # Pulumi passphrase + KMS key entries derived from ad_backends. Each string
-  # in a backend's `passphrase` list becomes a separate secret + key name, and
-  # readers = the backend's `identities` — so the same SPs that hold
-  # Storage Blob Data Contributor on the state container also gain Key Vault
-  # Secrets User and Key Vault Crypto User on the matching secret + key.
-  pulumi_from_ad_backends = {
-    for pair in flatten([
-      for k, v in local.ad_backends : [
-        for pname in try(v.passphrase, []) : {
-          name    = pname
-          readers = try(v.identities, [])
-        }
-      ]
-    ]) : pair.name => { readers = pair.readers }
-  }
-
-  pulumi_passphrases = merge(local.pulumi_passphrases_explicit, local.pulumi_from_ad_backends)
-
+  # Explicitly-declared Pulumi KMS keys (used as `secrets-provider` in Pulumi
+  # stacks via azurekeyvault://.../keys/<name>). Additional entries are
+  # merged in from ad_backends.tf where an entry lists `pulumi_keys = [...]`.
   pulumi_keys_explicit = {
-    # Example KMS key for Pulumi KV provider:
     infra-azure-foundations-stack-adi-tenant = {
       readers = [
         "github-actions-infra-azure-foundations-infra",
@@ -47,24 +20,23 @@ locals {
     }
   }
 
-  pulumi_keys = merge(local.pulumi_keys_explicit, local.pulumi_from_ad_backends)
-
-  secret_reader_pairs = flatten([
-    for sname, cfg in local.pulumi_passphrases : [
-      for r in cfg.readers : {
-        secret_name = sname
-        reader_name = r
-      }
-    ]
-  ])
-
-  
-  # Distinct list of all reader display names
-  secret_reader_names = distinct([for p in local.secret_reader_pairs : p.reader_name])
-  principal_by_name = {
-    for sp in data.azuread_service_principals.secret_readers.service_principals :
-    sp.display_name => sp
+  # Pulumi KMS key entries derived from ad_backends. Each string in a
+  # backend's `pulumi_keys` list becomes a separate key, and readers = the
+  # backend's `identities` — so the same SPs that hold Storage Blob Data
+  # Contributor on the state container also gain Key Vault Crypto User on
+  # the matching key.
+  pulumi_keys_from_ad_backends = {
+    for pair in flatten([
+      for k, v in local.ad_backends : [
+        for kname in try(v.pulumi_keys, []) : {
+          name    = kname
+          readers = try(v.identities, [])
+        }
+      ]
+    ]) : pair.name => { readers = pair.readers }
   }
+
+  pulumi_keys = merge(local.pulumi_keys_explicit, local.pulumi_keys_from_ad_backends)
 
   # Provide sensible defaults, then merge per-key overrides from `pulumi_keys`
   pulumi_keys_merged = {
@@ -107,42 +79,10 @@ resource "azurerm_key_vault" "pulumi_kv" {
   location                      = azurerm_resource_group.rg.location
   resource_group_name           = azurerm_resource_group.rg.name
   rbac_authorization_enabled    = true
-  soft_delete_retention_days    = 30
+  soft_delete_retention_days    = 90
   purge_protection_enabled      = true
   sku_name                      = "standard"
   public_network_access_enabled = true
-}
-
-resource "random_password" "pass" {
-  for_each = local.pulumi_passphrases
-  length   = 12
-  special  = false
-  numeric  = true
-}
-
-resource "azurerm_key_vault_secret" "pulumi_secrets" {
-  for_each     = local.pulumi_passphrases
-  name         = each.key
-  value        = random_password.pass[each.key].result
-  key_vault_id = azurerm_key_vault.pulumi_kv.id
-  content_type = "text/plain"
-}
-
-data "azuread_service_principals" "secret_readers" {
-  display_names = local.secret_reader_names
-  depends_on    = [azuread_service_principal.github_actions_sp]
-}
-
-resource "azurerm_role_assignment" "secret_readers" {
-  for_each = {
-    for p in local.secret_reader_pairs :
-    "${p.secret_name}|${p.reader_name}" => p
-  }
-
-  # scope              = "${azurerm_key_vault.pulumi_kv.id}/secrets/${each.value.secret_name}"
-  scope                = azurerm_key_vault_secret.pulumi_secrets[each.value.secret_name].resource_versionless_id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = local.principal_by_name[each.value.reader_name].object_id
 }
 
 data "azuread_service_principals" "key_readers" {
