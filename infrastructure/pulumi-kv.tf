@@ -1,5 +1,7 @@
 locals {
-  pulumi_passphrases = {
+  # Explicitly-declared Pulumi passphrases. Additional entries are merged in
+  # from ad_backends.tf where an entry sets `passphrase = true`.
+  pulumi_passphrases_explicit = {
     infra-azure-foundations-stack-adi-tenant : {
       readers : [
         "github-actions-infra-azure-foundations-infra",
@@ -8,7 +10,25 @@ locals {
     }
   }
 
-  pulumi_keys = {
+  # Pulumi passphrase + KMS key entries derived from ad_backends. Each string
+  # in a backend's `passphrase` list becomes a separate secret + key name, and
+  # readers = the backend's `identities` — so the same SPs that hold
+  # Storage Blob Data Contributor on the state container also gain Key Vault
+  # Secrets User and Key Vault Crypto User on the matching secret + key.
+  pulumi_from_ad_backends = {
+    for pair in flatten([
+      for k, v in local.ad_backends : [
+        for pname in try(v.passphrase, []) : {
+          name    = pname
+          readers = try(v.identities, [])
+        }
+      ]
+    ]) : pair.name => { readers = pair.readers }
+  }
+
+  pulumi_passphrases = merge(local.pulumi_passphrases_explicit, local.pulumi_from_ad_backends)
+
+  pulumi_keys_explicit = {
     # Example KMS key for Pulumi KV provider:
     infra-azure-foundations-stack-adi-tenant = {
       readers = [
@@ -26,6 +46,8 @@ locals {
       # tags             = { purpose = "pulumi-kms" }
     }
   }
+
+  pulumi_keys = merge(local.pulumi_keys_explicit, local.pulumi_from_ad_backends)
 
   secret_reader_pairs = flatten([
     for sname, cfg in local.pulumi_passphrases : [

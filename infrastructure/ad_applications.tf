@@ -1,4 +1,9 @@
 locals {
+  # DEPRECATED: do not add new entries here. This map provisions AAD apps,
+  # service principals and federated credentials in this repo on behalf of
+  # consumer repos. New backends should instead be declared in
+  # `tf_backends.tf` (and `pulumi-kv.tf` for Pulumi), referencing identities
+  # that the consumer repo manages itself. See AGENTS.md.
   github_repos_with_apps = {
     backstage_test : {
       github_org  = "bortington"
