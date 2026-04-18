@@ -35,14 +35,14 @@ locals {
       repo       = "https://github.com/badbort/uplift-2026"
       identities = ["github-actions-uplift-2026"]
     }
-    infra-azure-foundations : {
-      name = "infra-azure-foundations"
-      repo = "https://github.com/badbort/infra-azure-foundations"
+    infra-azure-frontdoor : {
+      name = "infra-azure-foundfrontdoorations"
+      repo = "https://github.com/badbort/infra-azure-frontdoor"
       identities = [
         "github-actions-infra-azure-frontdoor-infra",
         "github-actions-infra-azure-frontdoor-preview",
       ]
-      passphrase = ["infra-azure-foundations"]
+      passphrase = ["infra-azure-frontdoor"]
     }
   }
 
