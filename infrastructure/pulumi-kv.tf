@@ -27,10 +27,10 @@ locals {
   # the matching key.
   pulumi_keys_from_ad_backends = {
     for pair in flatten([
-      for k, v in local.ad_backends : [
-        for kname in try(v.pulumi_keys, []) : {
+      for k, v in var.ad_backends : [
+        for kname in v.pulumi_keys : {
           name    = kname
-          readers = try(v.identities, [])
+          readers = v.identities
         }
       ]
     ]) : pair.name => { readers = pair.readers }
