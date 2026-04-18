@@ -1,4 +1,9 @@
 locals {
+  # DEPRECATED: do not add new entries here. This map provisions AAD apps,
+  # service principals and federated credentials in this repo on behalf of
+  # consumer repos. New backends should instead be declared in
+  # `tf_backends.tf` (and `pulumi-kv.tf` for Pulumi), referencing identities
+  # that the consumer repo manages itself. See AGENTS.md.
   github_repos_with_apps = {
     backstage_test : {
       github_org  = "bortington"
@@ -19,31 +24,6 @@ locals {
       github_org  = "badbort"
       repo        = "tf-github-repo-management"
       environment = "main"
-    }
-    apim-managed-test-dev : {
-      github_org     = "badbort"
-      repo           = "apim-managed-test"
-      environment    = "dev"
-      resource_group = "rg-apim-managed-test"
-    }
-    telemetry-test : {
-      github_org     = "bortington"
-      repo           = "telemetry-test"
-      environment    = "primary"
-      resource_group = "rg-telemetry-test"
-      backend        = "telemetry-test"
-      role_assignments = [
-        "Storage Account Contributor",
-        "Storage Blob Data Owner",
-        "Storage Table Data Contributor",
-        "Storage File Data Privileged Contributor",
-        "Storage File Data SMB Share Contributor",
-        "Storage File Data SMB Share Elevated Contributor",
-        "Owner",
-        "User Access Administrator",
-        "Azure Service Bus Data Owner",
-        "Key Vault Administrator"
-      ]
     }
     infra-azure-foundations-infra : {
       github_org  = "badbort"
@@ -134,9 +114,6 @@ resource "azurerm_storage_container" "ad_tf_backends" {
     github_org = each.value.github_org
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_role_assignment" "backend_ad_blob_contributor" {
