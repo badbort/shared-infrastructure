@@ -31,25 +31,6 @@ locals {
       environment    = "dev"
       resource_group = "rg-apim-managed-test"
     }
-    telemetry-test : {
-      github_org     = "bortington"
-      repo           = "telemetry-test"
-      environment    = "primary"
-      resource_group = "rg-telemetry-test"
-      backend        = "telemetry-test"
-      role_assignments = [
-        "Storage Account Contributor",
-        "Storage Blob Data Owner",
-        "Storage Table Data Contributor",
-        "Storage File Data Privileged Contributor",
-        "Storage File Data SMB Share Contributor",
-        "Storage File Data SMB Share Elevated Contributor",
-        "Owner",
-        "User Access Administrator",
-        "Azure Service Bus Data Owner",
-        "Key Vault Administrator"
-      ]
-    }
     infra-azure-foundations-infra : {
       github_org  = "badbort"
       repo        = "infra-azure-foundations"
